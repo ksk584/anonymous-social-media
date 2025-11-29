@@ -27,21 +27,18 @@ export async function POST(req: NextRequest) {
     if (!email || !password || !username) {
       return NextResponse.json({ error: "Email, password, and username are required" }, { status: 400 })
     }
-
-   const { data, error } = await supabase.auth.signUp({
-  email: email,             // from your form state
-  password: password,       // from your form state
+const { data, error: signupError } = await supabase.auth.signUp({
+  email,
+  password,
   options: {
-    data: {
-      username: username,   // <--- CRITICAL: You must pass this here!
-      // avatar_url: '...'  // optional, if your table requires it
-    },
-  },
-});
+    data: { username }
+  }
+})
 
-    if (signupError) {
-      throw signupError
-    }
+// Now 'signupError' exists, so your error box will work!
+if (signupError) {
+  // handle error
+}
 
     if (!data.user) {
       throw new Error("No user created")
