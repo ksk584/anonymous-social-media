@@ -1,10 +1,10 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react" // Added useEffect
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs" // Import Supabase Client
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -12,34 +12,41 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
+  
+  // Initialize Supabase client
+  const supabase = createClientComponentClient()
+
+  // ✅ THE NEW PART: Listen for auth changes automatically
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN") {
+        // This runs ONLY when Supabase confirms the user is logged in
+        router.refresh()
+        router.push("/")
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
     setLoading(true)
 
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      })
+    // We communicate directly with Supabase now (No /api/fetch needed)
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to log in")
-      }
-
-      // Wait a moment for auth state to update
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      router.push("/")
-    } catch (err: any) {
-      setError(err.message || "Failed to log in")
-    } finally {
+    if (error) {
+      setError(error.message)
       setLoading(false)
+      // We do NOT redirect here. 
+      // If login succeeds, the useEffect above handles the redirect.
     }
   }
 
