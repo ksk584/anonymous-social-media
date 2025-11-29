@@ -42,10 +42,6 @@ export async function POST(req: NextRequest) {
     }
 
 
-    if (profileError) {
-      throw profileError
-    }
-
     return NextResponse.json({ message: "Signup successful" }, { status: 200 })
   } catch (error: any) {
     console.error("[v0] Signup error:", error.message)
