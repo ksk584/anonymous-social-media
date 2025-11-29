@@ -5,6 +5,5 @@
 
 ## Deployment
 
-Your project is live at:
-
+Project is live at:
 **[https://vercel.com/ksk5842hh-4474s-projects/v0-anonymous-social-media](https://vercel.com/ksk5842hh-4474s-projects/v0-anonymous-social-media)**
