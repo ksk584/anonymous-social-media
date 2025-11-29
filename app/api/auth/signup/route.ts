@@ -41,7 +41,6 @@ export async function POST(req: NextRequest) {
       throw new Error("No user created")
     }
 
-    const { error: profileError } = await supabase.from("profiles").insert([{ id: data.user.id, username }])
 
     if (profileError) {
       throw profileError
